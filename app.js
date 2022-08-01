@@ -10,6 +10,9 @@ modal.addEventListener('change', toggleTech)
 form.addEventListener('submit', createTech)
 
 const APP_TITLE = document.title;
+const LS_KEY = 'MY_TECH'
+
+const technologies = getState() //массив технологий
 
 function openCard(event) {
     const data = event.target.dataset
@@ -37,6 +40,8 @@ function toggleTech(event){
     const tech = technologies.find(t => t.type === type)
     tech.done = event.target.checked
     init()
+
+    saveState()
 }
 
 function openModal(html, title = APP_TITLE) {
@@ -49,14 +54,6 @@ function closeCard() {
     modal.classList.remove('open')
     document.title = ` ${APP_TITLE}`
 }
-
-const technologies = [
-    { title: 'HTML', description: 'HTML text', type: 'html', done: true },
-    { title: 'CSS', description: 'CSS text', type: 'css', done: true },
-    { title: 'JavaScript', description: 'JavaScript text', type: 'javascript', done: false },
-    { title: 'React', description: 'React text', type: 'react', done: false },
-    { title: 'Git', description: 'Git text', type: 'git', done: false }
-]
 
 function init() {
     renderCards()
@@ -81,8 +78,7 @@ function toCard(tech) {
     `
 }
 
-init()
-
+//отрисовка полосы прогресса
 function renderProgress() {
     const percent = computeProgressPercent()
     let background
@@ -98,6 +94,7 @@ function renderProgress() {
     progress.textContent = percent ? `${percent}%` : ''
 }
 
+//вычисление процента изученных технологий
 function computeProgressPercent() {
     if (technologies.length === 0) return 0
     let doneCount = 0;
@@ -112,11 +109,14 @@ function isValid(title, description){
 }
 
 function createTech(event){
+    //убрать перезагрузку страницы после submit 
     event.preventDefault()
-
+    
+    //получить title и description из формы ввода
     const {title, description} = event.target
 
     if(isValid(title, description)){
+        //подсветить красным цветом пустые поля 
         if(!title.value) title.classList.add('invalid')
         if(!description.value) description.classList.add('invalid')
 
@@ -128,6 +128,7 @@ function createTech(event){
         return 
     }
 
+    //новая технология
     const newTech = {
         title: title.value,
         description: description.value,
@@ -135,8 +136,21 @@ function createTech(event){
         type: title.value.toLowerCase()
     }
 
+    //push в массив технологий
     technologies.push(newTech)
+    saveState()
     title.value = ''
     description.value = ''
     init()
 }
+
+function saveState(){
+    localStorage.setItem(LS_KEY, JSON.stringify(technologies))
+}
+
+function getState(){
+    const row = localStorage.getItem(LS_KEY)
+    return row ? JSON.parse(row) : []
+}
+
+init()
