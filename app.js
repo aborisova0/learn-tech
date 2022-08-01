@@ -2,10 +2,12 @@ const content = document.querySelector('#content');
 const modal = document.querySelector('#modal');
 const backdrop = document.querySelector('#backdrop');
 const progress = document.querySelector('#progress');
+const form = document.querySelector('#form');
 
 content.addEventListener('click', openCard);
 backdrop.addEventListener('click', closeCard);
 modal.addEventListener('change', toggleTech)
+form.addEventListener('submit', createTech)
 
 const APP_TITLE = document.title;
 
@@ -103,4 +105,38 @@ function computeProgressPercent() {
         if (item.done) doneCount++
     }
     return Math.round(doneCount / technologies.length * 100);
+}
+
+function isValid(title, description){
+    return !title.value || !description.value
+}
+
+function createTech(event){
+    event.preventDefault()
+
+    const {title, description} = event.target
+
+    if(isValid(title, description)){
+        if(!title.value) title.classList.add('invalid')
+        if(!description.value) description.classList.add('invalid')
+
+        setTimeout(()=>{
+            title.classList.remove('invalid')
+            description.classList.remove('invalid')
+        }, 2000)
+
+        return 
+    }
+
+    const newTech = {
+        title: title.value,
+        description: description.value,
+        done: false,
+        type: title.value.toLowerCase()
+    }
+
+    technologies.push(newTech)
+    title.value = ''
+    description.value = ''
+    init()
 }
